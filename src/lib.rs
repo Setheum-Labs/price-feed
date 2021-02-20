@@ -57,12 +57,12 @@ decl_module! {
         fn deposit_event() = default;
 
         #[weight = 0]
-        pub fn set_price(origin, new_price: u32) -> dispatch::DispatchResult {
+        pub fn set_price(origin, currency_id: CurrencyId, new_price: u32) -> dispatch::DispatchResult {
             let _who = ensure_signed(origin)?;
 
-            Price::put(new_price);
+            Price::put(currency_id, new_price);
 
-            Self::deposit_event(RawEvent::NewPrice(new_price));
+            Self::deposit_event(RawEvent::NewPrice(currency_id, new_price));
 
             Ok(())
         }
@@ -73,9 +73,9 @@ decl_module! {
             let price = T::OffchainPrice::fetch_price(b"DOT").unwrap();
 
             native::info!("DOT offchain price: {}", price);
-            Price::put(price);
+            Price::put(currency_id, new_price);
 
-            Self::deposit_event(RawEvent::NewPrice(price));
+            Self::deposit_event(RawEvent::NewPrice(currency_id, new_price));
 
             Ok(())
         }
