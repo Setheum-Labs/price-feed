@@ -71,9 +71,9 @@ decl_module! {
         #[weight = 0]
         pub fn get_offchain_price(origin) -> dispatch::DispatchResult {
             let _who = ensure_signed(origin)?;
-            let price = T::OffchainPrice::fetch_price().unwrap();
+            let price = T::OffchainPrice::fetch_price(b"DOT").unwrap();
 
-            native::info!("USD offchain price: {}", price);
+            native::info!("DOT offchain price: {}", price);
             Price::put(price);
 
             Self::deposit_event(RawEvent::NewPrice(price));
