@@ -33,6 +33,7 @@ decl_event!(
     pub enum Event<T>
     where
         AccountId = <T as frame_system::Trait>::AccountId,
+        CurrencyId = CurrencyIdOf<T>,
     {
         NewPrice(u32),
         CurrencyId(currency_id)
