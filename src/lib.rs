@@ -36,7 +36,6 @@ decl_event!(
         CurrencyId = CurrencyIdOf<T>,
     {
         NewPrice(u32),
-        CurrencyId(currency_id)
 
         DummyEvent(AccountId),
     }
