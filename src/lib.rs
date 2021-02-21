@@ -3,9 +3,8 @@
 /// A price feed pallet
 use frame_support::{debug::native, decl_error, decl_event, decl_module, decl_storage, dispatch};
 use frame_system::ensure_signed;
-use serml_traits::*;
 use fetch_price::FetchPriceFor;
-
+use orml_traits::{BasicCurrency, CurrencyId};
 impl<T: Trait> FetchPrice<u32> for Module<T> {
     fn fetch_price() -> u32 {
         Self::get_price()
@@ -36,6 +35,7 @@ decl_event!(
         AccountId = <T as frame_system::Trait>::AccountId,
     {
         NewPrice(u32),
+        CurrencyId(currency_id)
 
         DummyEvent(AccountId),
     }
