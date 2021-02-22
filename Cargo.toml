@@ -31,5 +31,4 @@ std = [
     'safe-mix/std',
     'frame-system/std',
     'fetch-price/std',
-    'stp258/std',
 ]
