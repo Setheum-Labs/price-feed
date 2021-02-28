@@ -6,7 +6,7 @@ use frame_support::{impl_outer_origin, parameter_types, weights::Weight};
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup}, testing::Header, Perbill,
 };
-use pfetch_price::FetchPriceFor;
+use fetch_price::FetchPriceFor;
 
 impl_outer_origin! {
 	pub enum Origin for Test {}
