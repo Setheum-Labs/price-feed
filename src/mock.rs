@@ -6,7 +6,6 @@ use frame_support::{impl_outer_origin, parameter_types, weights::Weight};
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup}, testing::Header, Perbill,
 };
-use fetch_price::FetchPriceFor;
 
 impl_outer_origin! {
 	pub enum Origin for Test {}
@@ -45,18 +44,8 @@ impl system::Trait for Test {
 	type OnKilledAccount = ();
 }
 
-pub struct OffchainPriceMock;
-
-impl FetchPriceFor for OffchainPriceMock {
-	fn get_price_for(symbol: &[u8]) -> Option<u64> {
-		return Some(symbol.len() as u64)
-	}
-}
-
 impl Trait for Test {
 	type Event = ();
-
-	type OffchainPrice = OffchainPriceMock;
 }
 
 pub type PriceModule = Module<Test>;

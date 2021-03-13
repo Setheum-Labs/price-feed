@@ -4,7 +4,7 @@
 use frame_support::{debug::native, decl_error, decl_event, decl_module, decl_storage, dispatch};
 use frame_system::ensure_signed;
 use fetch_price::FetchPriceFor;
-use orml_traits::{BasicCurrency, CurrencyId};
+use stp258_traits::{Stp258Currency, CurrencyId};
 
 impl<T: Trait> FetchPrice<u32> for Module<T> {
     fn fetch_price() -> u32 {
@@ -18,14 +18,12 @@ pub trait Trait: frame_system::Trait {
 
     /// The overarching event type.
     type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
-
-    type OffchainPrice: FetchPriceFor;
 }
 
 // This pallet's storage items.
 decl_storage! {
     trait Store for Module<T: Trait> as Price {
-        Price get(fn get_price): u32 = 1_000_000;
+        Price get(fn get_price): u32 = 1_000;
     }
 }
 
@@ -61,19 +59,6 @@ decl_module! {
         pub fn set_price(origin, currency_id: CurrencyId, new_price: u32) -> dispatch::DispatchResult {
             let _who = ensure_signed(origin)?;
 
-            Price::put(currency_id, new_price);
-
-            Self::deposit_event(RawEvent::NewPrice(currency_id, new_price));
-
-            Ok(())
-        }
-
-        #[weight = 0]
-        pub fn get_offchain_price(origin) -> dispatch::DispatchResult {
-            let _who = ensure_signed(origin)?;
-            let price = T::OffchainPrice::fetch_price(b"DOT").unwrap();
-
-            native::info!("DOT offchain price: {}", price);
             Price::put(currency_id, new_price);
 
             Self::deposit_event(RawEvent::NewPrice(currency_id, new_price));
