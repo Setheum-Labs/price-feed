@@ -2,9 +2,15 @@
 
 /// A price feed pallet
 use frame_support::{debug::native, decl_error, decl_event, decl_module, decl_storage, dispatch};
-use frame_system::ensure_signed;
-use fetch_price::FetchPriceFor;
-use stp258_traits::{Stp258Currency, CurrencyId};
+use sp_runtime::{
+	traits::{AtLeast32Bit, CheckedAdd, CheckedDiv, CheckedMul, MaybeSerializeDeserialize, Member, Zero}, 
+	DispatchResult, PerThing, Perbill, RuntimeDebug,
+};
+use frame_system::{self as system, ensure_signed, pallet_prelude::*};
+use stp258_traits::{Stp258Currency};
+
+mod mock;
+mod tests;
 
 impl<T: Trait> FetchPrice<u32> for Module<T> {
     fn fetch_price() -> u32 {
@@ -18,6 +24,9 @@ pub trait Trait: frame_system::Trait {
 
     /// The overarching event type.
     type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
+
+    /// The currency ID type
+	type CurrencyId: Parameter + Member + Copy + MaybeSerializeDeserialize + Ord;
 }
 
 // This pallet's storage items.
@@ -30,13 +39,9 @@ decl_storage! {
 // The pallet's events
 decl_event!(
     pub enum Event<T>
-    where
-        AccountId = <T as frame_system::Trait>::AccountId,
-        CurrencyId = CurrencyIdOf<T>,
     {
         NewPrice(u32),
 
-        DummyEvent(AccountId),
     }
 );
 
