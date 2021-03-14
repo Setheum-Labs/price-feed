@@ -4,17 +4,13 @@
 
 use sp_std::prelude::*;
 
-use codec::{Decode, Encode};
-use frame_support::pallet_prelude::*;
+use frame_support::{pallet_prelude::*, dispatch::PostDispatchInfo,};
 use sp_runtime::{
 	traits::{
-		AccountIdConversion, AtLeast32BitUnsigned, Bounded, CheckedAdd, CheckedSub, MaybeSerializeDeserialize, Member,
-		Saturating, StaticLookup, Zero,
+		AtLeast32BitUnsigned, MaybeSerializeDeserialize, Member
 	},
-	DispatchError, DispatchResult, ModuleId, RuntimeDebug,
 };
-use frame_system::{self as system, ensure_signed, pallet_prelude::*};
-use stp258_traits::{Stp258Currency};
+use frame_system::{ensure_signed, pallet_prelude::*};
 
 mod mock;
 mod tests;
@@ -34,8 +30,11 @@ pub mod module {
         // Add other types and constants required to configure this pallet.
 
         /// The overarching event type.
-       type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         
+        /// The balance type
+        type Balance: Parameter + Member + AtLeast32BitUnsigned + Default + Copy + MaybeSerializeDeserialize;
+
         /// The currency ID type
         type CurrencyId: Parameter + Member + Copy + MaybeSerializeDeserialize + Ord;
     }
@@ -58,7 +57,7 @@ pub mod module {
     #[pallet::generate_deposit(fn deposit_event)]
     pub enum Event<T: Config> {
         /// The New Price of Currency. [currency_id, price]
-        NewPrice(u32),
+        NewPrice(T::CurrencyId, u32),
     }
 
 
@@ -85,11 +84,10 @@ pub mod module {
         pub fn set_price(origin: OriginFor<T>, currency_id: T::CurrencyId, new_price: u32) -> DispatchResultWithPostInfo {
             let _who = ensure_signed(origin)?;
 
-            Price::put(currency_id, new_price);
+            Price::insert(currency_id, new_price);
 
             Self::deposit_event(Event::NewPrice(currency_id, new_price));
-
-            Ok(())
+            Ok(().into())
         }
     }
 }
