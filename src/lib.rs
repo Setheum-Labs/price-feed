@@ -53,8 +53,8 @@ pub mod module {
     >;
 
     // The pallet's events
-    #[pallet::event]
-    #[pallet::generate_deposit(fn deposit_event)]
+   #[pallet::event]
+	#[pallet::generate_deposit(pub(crate) fn deposit_event)]
     pub enum Event<T: Config> {
         /// The New Price of Currency. [currency_id, price]
         NewPrice(T::CurrencyId, u32),
