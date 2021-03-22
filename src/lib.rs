@@ -1,84 +1,75 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![allow(clippy::unused_unit)]
 
 /// A price feed pallet
-use frame_support::{debug::native, decl_error, decl_event, decl_module, decl_storage, dispatch};
-use frame_system::ensure_signed;
+use frame_support::{pallet_prelude::*, dispatch};
+use frame_system::{ensure_signed, pallet_prelude::*};
 use stp258_traits::FetchPrice;
 use serp_example_ocw::FetchPriceFor;
 
 /// Expected price oracle interface. `fetch_price` must return the amount of Stablecoins exchanged for the tracked value.
-impl<T: Trait> FetchPrice<u32> for Module<T> {
-    fn fetch_price() -> u32 {
+impl<T: Trait> FetchPrice<u64> for Module<T> {
+    fn fetch_price() -> u64 {
         Self::get_price()
     }
 }
 
 /// The pallet's configuration trait.
-pub trait Trait: frame_system::Trait {
-    // Add other types and constants required to configure this pallet.
-
-    /// The overarching event type.
-    type Event: From<Event<Self>> + Into<<Self as frame_system::Trait>::Event>;
+#[pallet::config]
+pub trait Config: frame_system::Config {
+    type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
     type OffchainPrice: FetchPriceFor;
 }
 
 // This pallet's storage items.
-decl_storage! {
-    trait Store for Module<T: Trait> as Price {
-        Price get(fn get_price): u32 = 1_000_000;
-    }
-}
+#[pallet::storage]
+#[pallet::getter(fn get_price)]
+#[pallet::metadata(PriceUnit: u64 = "1_000")]
+pub(crate) type Price<T: Config> = StorageMap<_, Twox64Concat, CurrencyId, PriceUnit, u64, ValueQuery>;
+
 
 // The pallet's events
-decl_event!(
-    pub enum Event<T>
-    where
-        AccountId = <T as frame_system::Trait>::AccountId,
-    {
-        NewPrice(u32),
-
-        DummyEvent(AccountId),
-    }
-);
+#[pallet::event]
+#[pallet::generate_deposit(pub(crate) fn deposit_event)]
+#[pallet::metadata(AccountId = "AccountId")]
+pub enum Event<T: Config> {NewPrice(u64)}
 
 // The pallet's errors
-decl_error! {
-    pub enum Error for Module<T: Trait> {
-        NoOffchainPrice
-    }
+#[pallet::error]
+pub enum Error<T> {
+    /// Some wrong behavior
+    NoOffchainPrice
 }
 
 // The pallet's dispatchable functions.
-decl_module! {
-    /// The module declaration.
-    pub struct Module<T: Trait> for enum Call where origin: T::Origin {
-        type Error = Error<T>;
+#[pallet::call]
+impl<T: Config> Pallet<T> {
+    type Error = Error<T>;
 
-        fn deposit_event() = default;
+    fn deposit_event() = default;
 
-        #[weight = 0]
-        pub fn set_price(origin, new_price: u32) -> dispatch::DispatchResult {
-            let _who = ensure_signed(origin)?;
+    #[weight = 0]
+    pub fn set_price(origin, new_price: u64) -> dispatch::DispatchResult {
+        let _who = ensure_signed(origin)?;
 
-            Price::put(new_price);
+        Price::put(new_price);
 
-            Self::deposit_event(RawEvent::NewPrice(new_price));
+        Self::deposit_event(RawEvent::NewPrice(new_price));
 
-            Ok(())
-        }
+        Ok(())
+    }
 
-        #[weight = 0]
-        pub fn get_offchain_price(origin) -> dispatch::DispatchResult {
-            let _who = ensure_signed(origin)?;
-            let price = T::OffchainPrice::fetch_price().unwrap();
+    #[weight = 0]
+    pub fn get_offchain_price(origin) -> dispatch::DispatchResult {
+        let _who = ensure_signed(origin)?;
+        let price = T::OffchainPrice::fetch_price().unwrap();
 
-            native::info!("JUSD/USD offchain price: {}", price);
-            Price::put(price);
+        native::info!("JUSD/USD offchain price: {}", price);
+        Price::put(price);
 
-            Self::deposit_event(RawEvent::NewPrice(price));
+        Self::deposit_event(RawEvent::NewPrice(price));
 
-            Ok(())
-        }
+        Ok(())
     }
 }
