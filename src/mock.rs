@@ -48,8 +48,8 @@ impl system::Trait for Test {
 pub struct OffchainPriceMock;
 
 impl FetchPriceFor for OffchainPriceMock {
-	fn get_price_for(symbol: &[u8]) -> Option<u64> {
-		return Some(symbol.len() as u64)
+	fn get_price_for() -> u64 {
+		return Some(price as u64)
 	}
 }
 
