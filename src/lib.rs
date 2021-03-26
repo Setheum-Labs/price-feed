@@ -7,8 +7,8 @@ use stp258_traits::FetchPrice;
 use serp_example_ocw::FetchPriceFor;
 
 /// Expected price oracle interface. `fetch_price` must return the amount of Stablecoins exchanged for the tracked value.
-impl<T: Trait> FetchPrice<u32> for Module<T> {
-    fn fetch_price() -> u32 {
+impl<T: Trait> FetchPrice<u64> for Module<T> {
+    fn fetch_price() -> u64 {
         Self::get_price()
     }
 }
@@ -26,7 +26,7 @@ pub trait Trait: frame_system::Trait {
 // This pallet's storage items.
 decl_storage! {
     trait Store for Module<T: Trait> as Price {
-        Price get(fn get_price): u32 = 1_000_000;
+        Price get(fn get_price): u64 = 1_000;
     }
 }
 
@@ -36,7 +36,7 @@ decl_event!(
     where
         AccountId = <T as frame_system::Trait>::AccountId,
     {
-        NewPrice(u32),
+        NewPrice(u64),
 
         DummyEvent(AccountId),
     }
@@ -58,7 +58,7 @@ decl_module! {
         fn deposit_event() = default;
 
         #[weight = 0]
-        pub fn set_price(origin, new_price: u32) -> dispatch::DispatchResult {
+        pub fn set_price(origin, new_price: u64) -> dispatch::DispatchResult {
             let _who = ensure_signed(origin)?;
 
             Price::put(new_price);

@@ -6,7 +6,7 @@ use frame_support::{impl_outer_origin, parameter_types, weights::Weight};
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup}, testing::Header, Perbill,
 };
-use fetch_price::FetchPriceFor;
+use price_fetch::FetchPriceFor;
 
 impl_outer_origin! {
 	pub enum Origin for Test {}
@@ -48,8 +48,8 @@ impl system::Trait for Test {
 pub struct OffchainPriceMock;
 
 impl FetchPriceFor for OffchainPriceMock {
-	fn get_price_for() -> u64 {
-		return Some(price as u64)
+	fn get_price_for() -> Result<u64> {
+		return Some(price)
 	}
 }
 
